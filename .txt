@@ -1,0 +1,56 @@
+Oluwasegun Lawrence
+Ojo, Lagos
++234(0)9022682889
+lawrencesegun025@gmail.components
+www.linkedin.com/in/lawrenceoluwasegun
+www.linkedin.com/in/lawrenceoluwasegun
+
+Objective:
+--------------
+Experienced Go and React developer with a strong background in building scalable web applications and microservices. Adept at designing and implementing robust backend systems in Go, as well as crafting elegant and responsive user interfaces with React. Seeking opportunities to leverage my expertise in full-stack development to create innovative software solutions.
+
+Professional Experience:
+-------------------------
+Frontend Developer | Phsps Apps | Okokomaiko, Ojo, Lagos | February 2020 - April 2022
+- Developed and maintained backend services in Go, implementing RESTful APIs, authentication, and data processing.
+- Designed and optimized database schemas, including SQL and NoSQL databases, for efficient data storage and retrieval.
+- Collaborated with frontend developers to integrate React components into the application, ensuring seamless user experiences.
+- Implemented unit tests and conducted code reviews to maintain code quality and reliability.
+- Worked with Docker and Kubernetes for containerization and orchestration of microservices.
+- Utilized continuous integration/continuous deployment (CI/CD) pipelines to automate software deployment processes.
+- Participated in Agile/Scrum development processes, delivering features and enhancements on time.
+- Troubleshooted and resolved performance bottlenecks and production issues to ensure system reliability.
+- Mentored junior developers, fostering a culture of learning and improvement.
+
+
+Education:
+-----------
+Bachelor's/Master's Degree in Computer Science
+Lagos State University | Ojo, Lagos | August, 2024
+
+Skills:
+-------
+Backend Development: Go (Golang), RESTful APIs, Microservices, NoSQL
+Frontend Development: React, JavaScript, HTML5, CSS3
+DevOps & Tools: Docker, Kubernetes, CI/CD, Git, Agile/Scrum
+Database: MongoDB
+Version Control: Git
+Testing: Unit Testing
+Deployment: Heroku, Netlify
+Other: Responsive Design, UI/UX Integration, Code Review, Troubleshooting
+
+Projects:
+----------
+Business Tracker
+- Description: Simple Business Tracking API written in golang to help business owners monitor their businesses
+- GitHub Repository: https://github.com/EmeraldLS/business-tracker-api
+
+Airport Departure & Arrivals 
+- Description: Assist travelers in understading the airport  
+- GitHub Repository: https://github.com/EmeraldLS/Toronto-Pearson
+
+
+Languages:
+-----------
+- English (Fluent)
+
