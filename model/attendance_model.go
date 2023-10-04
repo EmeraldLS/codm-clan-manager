@@ -3,15 +3,16 @@ package model
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Attendance struct {
-	ID   primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Day1 Lobbies
-	Day2 Lobbies
-	Day3 Lobbies
-	Day4 Lobbies
-	Day5 Lobbies
+	ID             primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	TournamentName string             `json:"tournament_name,omitempty" bson:"tournament_name,omitempty"`
+	Day1           LobbiesData
+	Day2           LobbiesData
+	Day3           LobbiesData
+	Day4           LobbiesData
+	Day5           LobbiesData
 }
 
-type Lobbies struct {
+type LobbiesData struct {
 	Lobbies []Lobby
 }
 
@@ -51,4 +52,12 @@ type LobbyCreation struct {
 	LobbyNumber int    `json:"lobby_number" bson:"lobby_number" validate:"required"`
 	DayNumber   int    `json:"day_number,omitempty" bson:"day_number,omitempty" validate:"required"`
 	Players     []Player
+}
+
+type KillCount struct {
+	LobbyNumber int    `json:"lobby_number,omitempty" validate:"required"`
+	LobbyID     string `json:"lobby_id,omitempty" validate:"required"`
+	DayNumber   int    `json:"day_number,omitempty" bson:"day_number,omitempty" validate:"required"`
+	PLayerID    string `json:"player_id,omitempty" validate:"required"`
+	Kills       int    `json:"kills,omitempty" validate:"required"`
 }

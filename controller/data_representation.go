@@ -6,7 +6,7 @@ import (
 	"github.com/vought-esport-attendance/model"
 )
 
-func NewLobby(lobbies model.Lobbies, lobbyNumber int) []model.Lobby {
+func NewLobby(lobbies model.LobbiesData, lobbyNumber int) []model.Lobby {
 	lobby := model.Lobby{
 		LobbyNumber: lobbyNumber,
 		LobbyID:     uuid.NewString(),
@@ -26,15 +26,15 @@ func NewPlayer(playerId string, kills int, players []model.Player) []model.Playe
 	return players
 }
 
-func createDay() model.Lobbies {
-	return model.Lobbies{
+func createDay() model.LobbiesData {
+	return model.LobbiesData{
 		Lobbies: []model.Lobby{},
 	}
 }
 
 func RepresentDBData() model.Attendance {
-	return model.Attendance{
-		Day1: model.Lobbies{
+	attendance := model.Attendance{
+		Day1: model.LobbiesData{
 			Lobbies: []model.Lobby{{
 				LobbyID:     uuid.NewString(),
 				Date:        carbon.Now().ToDateString(),
@@ -46,7 +46,7 @@ func RepresentDBData() model.Attendance {
 				}},
 			}},
 		},
-		Day2: model.Lobbies{
+		Day2: model.LobbiesData{
 			Lobbies: []model.Lobby{{
 				LobbyID:     uuid.NewString(),
 				Date:        carbon.Now().ToDateString(),
@@ -62,4 +62,6 @@ func RepresentDBData() model.Attendance {
 		Day4: createDay(),
 		Day5: createDay(),
 	}
+
+	return attendance
 }

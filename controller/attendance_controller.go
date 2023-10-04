@@ -91,6 +91,7 @@ func GetLobbyByID(c *gin.Context) {
 }
 
 func GetPlayersInALobbby(c *gin.Context) {
+
 	id := c.Param("id")
 	var lobbyDetails model.LobbyDetails
 	if err := c.ShouldBindJSON(&lobbyDetails); err != nil {
@@ -124,6 +125,7 @@ func GetPlayersInALobbby(c *gin.Context) {
 }
 
 func GetPlayerDetailsFromALobby(c *gin.Context) {
+
 	id := c.Param("id")
 	var playerDetails model.PlayerDetails
 	if err := c.ShouldBindJSON(&playerDetails); err != nil {
@@ -153,6 +155,21 @@ func GetPlayerDetailsFromALobby(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, player)
+}
+
+func GetLobbyByIndex(c *gin.Context) {
+	id := c.Param("id")
+	if err := config.GetLobbyByIndex(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"response": "success",
+	})
 }
 
 // func InsertPlayerKills(c *gin.Context) {
@@ -213,51 +230,37 @@ func CreateLobby(c *gin.Context) {
 	c.JSON(http.StatusCreated, allLobby)
 }
 
-// func UpdateKillCount(c *gin.Context) {
+func AddPlayerKillsInALobby(c *gin.Context) {
 
-// 	lobbyID := c.Param("lobby_id")
-// 	playerID := c.Param("player_id")
+	_id := c.Param("id")
 
-// 	var killCount model.KillCount
+	var playerCreation model.KillCount
 
-// 	if err := c.ShouldBindJSON(&killCount); err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{
-// 			"response": err.Error(),
-// 		})
-// 		c.Abort()
-// 		return
-// 	}
+	if err := c.ShouldBindJSON(&playerCreation); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
 
-// 	var validate = validator.New()
-// 	if err := validate.Struct(killCount); err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{
-// 			"response": err.Error(),
-// 		})
-// 		c.Abort()
-// 		return
-// 	}
+	var validate = validator.New()
+	if err := validate.Struct(playerCreation); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
 
-// 	lobby, err := config.CheckLobbyID(lobbyID)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{
-// 			"response": err.Error(),
-// 		})
-// 		c.Abort()
-// 		return
-// 	}
+	allLobby, err := config.InsertPlayerKillInALobby(_id, playerCreation.LobbyID, playerCreation, playerCreation.DayNumber)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusCreated, allLobby)
 
-// 	player, err := config.CheckPlayerID(playerID)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{
-// 			"response": err.Error(),
-// 		})
-// 		c.Abort()
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"Lobby":  lobby,
-// 		"Player": player,
-// 	})
-
-// }
+}

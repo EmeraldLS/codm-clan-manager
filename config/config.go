@@ -10,6 +10,7 @@ import (
 	"github.com/vought-esport-attendance/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var AttendanceCollection = db.AttendanceCollection
@@ -155,8 +156,8 @@ func CreateLobby(id string, lobbyCreation model.LobbyCreation) ([]model.Lobby, e
 	if lobbyCreation.DayNumber > 5 || lobbyCreation.DayNumber < 1 {
 		return []model.Lobby{}, errors.New("invalid day number")
 	}
-	dayString := fmt.Sprintf("day%v.lobbies", lobbyCreation.DayNumber)
-	updateObj[dayString] = allLobby
+	queryString := fmt.Sprintf("day%v.lobbies", lobbyCreation.DayNumber)
+	updateObj[queryString] = allLobby
 	update := bson.M{"$set": updateObj}
 	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
 	defer cancel()
@@ -173,9 +174,112 @@ func CreateLobby(id string, lobbyCreation model.LobbyCreation) ([]model.Lobby, e
 	return allLobby, nil
 }
 
-func InsertKillsInALobby(id string, lobbyID string, day int) {
+func InsertPlayerKillInALobby(id string, lobbyID string, playerCreation model.KillCount, day int) ([]model.Lobby, error) {
+	allPlayers, err := GetPlayersInALobbby(id, lobbyID, day)
+	if err != nil {
+		return []model.Lobby{}, err
+	}
+
+	user, err := GetUserByID(playerCreation.PLayerID)
+	if err != nil {
+		return []model.Lobby{}, err
+	}
+
+	player := model.Player{
+		PlayerCode: user.PlayerCode,
+		PlayerID:   user.PlayerID,
+		Name:       user.Name,
+		Kills:      playerCreation.Kills,
+	}
+
+	var updateObj = bson.M{}
+	queryString := fmt.Sprintf("day%v.lobbies", day)
+
+	allLobby := []model.Lobby{}
+	var lobbyErr error = nil
+	switch day {
+	case 1:
+		allLobby, lobbyErr = GetAllLobbyInADay(id, 1)
+	case 2:
+		allLobby, lobbyErr = GetAllLobbyInADay(id, 2)
+	case 3:
+		allLobby, lobbyErr = GetAllLobbyInADay(id, 3)
+	case 4:
+		allLobby, lobbyErr = GetAllLobbyInADay(id, 4)
+	case 5:
+		allLobby, lobbyErr = GetAllLobbyInADay(id, 5)
+	}
+
+	if lobbyErr != nil {
+		return []model.Lobby{}, lobbyErr
+	}
+
+	var newLobbies = []model.Lobby{}
+
+	for _, i := range allLobby {
+		if i.LobbyID == lobbyID {
+			allPlayers = append(allPlayers, player)
+			i.Players = allPlayers
+		}
+		if len(i.Players) > 4 {
+			return []model.Lobby{}, errors.New("lobby is filled up")
+		}
+		newLobbies = append(newLobbies, i)
+	}
+
+	updateObj[queryString] = newLobbies
+	update := bson.M{"$set": updateObj}
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+	_id, err := ConvertStringToOBjectID(id)
+	if err != nil {
+		return []model.Lobby{}, err
+	}
+	filter := bson.M{"_id": _id}
+	result, err := AttendanceCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return []model.Lobby{}, err
+	}
+	fmt.Printf("Modified Count: %v\n", result.ModifiedCount)
+
+	return newLobbies, nil
 
 }
+
+func GetLobbyByIndex(id string) error {
+	_id, err := ConvertStringToOBjectID(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.M{"_id": _id}
+	projection := bson.M{"lobby": bson.M{
+		"$arrayElemAt": []interface{}{"$day1.lobbies", 1},
+	}}
+
+	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cursor, err := AttendanceCollection.Aggregate(ctx, mongo.Pipeline{
+		{{"$match", filter}},
+		{{"$project", projection}},
+	})
+	if err != nil {
+		return err
+	}
+
+	for cursor.Next(ctx) {
+		var result = bson.M{}
+		cursor.Decode(&result)
+		key := result["_id"]
+		fmt.Println(key)
+	}
+	return nil
+}
+
+/*
+
+	Below was the first secnario I used. Keeping it for future references.
+
+*/
 
 // func InsertLobby(id string) (model.Attendance, error) {
 
