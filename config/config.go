@@ -57,7 +57,7 @@ func GetAllLobbyInADay(id string, day int) ([]model.Lobby, error) {
 	case 5:
 		allLobby = attedance.Day5.Lobbies
 	default:
-		return []model.Lobby{}, errors.New("invalid day")
+		return []model.Lobby{}, errors.New("invalid day number")
 	}
 
 	return allLobby, nil

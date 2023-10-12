@@ -34,30 +34,8 @@ func createDay() model.LobbiesData {
 
 func RepresentDBData() model.Attendance {
 	attendance := model.Attendance{
-		Day1: model.LobbiesData{
-			Lobbies: []model.Lobby{{
-				LobbyID:     uuid.NewString(),
-				Date:        carbon.Now().ToDateString(),
-				LobbyNumber: 1,
-				Players: []model.Player{{
-					Name:     "Lawrence",
-					PlayerID: "VOUGHT_PLAYER_1",
-					Kills:    5,
-				}},
-			}},
-		},
-		Day2: model.LobbiesData{
-			Lobbies: []model.Lobby{{
-				LobbyID:     uuid.NewString(),
-				Date:        carbon.Now().ToDateString(),
-				LobbyNumber: 1,
-				Players: []model.Player{{
-					Name:     "Sanni",
-					PlayerID: "VOUGHT_PLAYER_2",
-					Kills:    2,
-				}},
-			}},
-		},
+		Day1: createDay(),
+		Day2: createDay(),
 		Day3: createDay(),
 		Day4: createDay(),
 		Day5: createDay(),

@@ -24,7 +24,7 @@ type Lobby struct {
 }
 
 type Player struct {
-	PlayerCode int    `json:"layer_code,omitempty" bson:"player_code,omitempty"`
+	PlayerCode int    `json:"player_code,omitempty" bson:"player_code,omitempty"`
 	PlayerID   string `json:"player_id,omitempty" bson:"player_id,omitempty"`
 	Name       string `json:"name,omitempty" bson:"name,omitempty"`
 	Kills      int    `json:"kills,omitempty" bson:"kills,omitempty" validate:"required"`
