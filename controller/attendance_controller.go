@@ -13,7 +13,25 @@ import (
 
 func InitializeDbContent(c *gin.Context) {
 	attendance := RepresentDBData()
+	var data struct {
+		TournamentName string `json:"tournament_name,omitempty" bson:"tournament_name,omitempty" validate:"required"`
+	}
 
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+	var validate = validator.New()
+	if err := validate.Struct(data); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
 	if err := config.InitializeDbContent(attendance); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
