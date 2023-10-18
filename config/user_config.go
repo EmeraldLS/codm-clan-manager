@@ -7,6 +7,7 @@ import (
 	"github.com/vought-esport-attendance/db"
 	"github.com/vought-esport-attendance/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var PlayersCollection = db.PlayersCollection
@@ -40,4 +41,34 @@ func GetUserByID(playerID string) (model.User, error) {
 
 	return user, nil
 
+}
+
+func GetAllUsers() ([]model.User, error) {
+	filter := bson.M{}
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+	findOptions := options.Find().SetSort(bson.M{"player_code": -1})
+	cursor, err := PlayersCollection.Find(ctx, filter, findOptions)
+	if err != nil {
+		return []model.User{}, err
+	}
+	var users []model.User
+	for cursor.Next(ctx) {
+		var user model.User
+		cursor.Decode(&user)
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func GetSingleUser(playerId string) (model.User, error) {
+	filter := bson.M{"player_id": playerId}
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+	var user model.User
+	if err := PlayersCollection.FindOne(ctx, filter).Decode(&user); err != nil {
+		return model.User{}, err
+	}
+	return user, nil
 }

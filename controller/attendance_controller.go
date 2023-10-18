@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -12,7 +13,7 @@ import (
 )
 
 func InitializeDbContent(c *gin.Context) {
-	attendance := RepresentDBData()
+
 	var data struct {
 		TournamentName string `json:"tournament_name,omitempty" bson:"tournament_name,omitempty" validate:"required"`
 	}
@@ -32,6 +33,7 @@ func InitializeDbContent(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	attendance := RepresentDBData(data.TournamentName)
 	if err := config.InitializeDbContent(attendance); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
@@ -45,19 +47,38 @@ func InitializeDbContent(c *gin.Context) {
 	})
 }
 
+func GetAllTournament(c *gin.Context) {
+	tournaments, err := config.GetAllTournament()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, tournaments)
+}
+
+func GetTournament(c *gin.Context) {
+	id := c.Param("id")
+	tournament, err := config.GetTournament(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, tournament)
+}
+
 func GetLobbyByDay(c *gin.Context) {
 	id := c.Param("id")
-	var day model.Day
-
-	if err := c.ShouldBindJSON(&day); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"response": err.Error(),
-		})
-		c.Abort()
-		return
-	}
-	validate := validator.New()
-	if err := validate.Struct(day); err != nil {
+	dayNumberString := c.Param("day_number")
+	dayNumber, err := strconv.Atoi(dayNumberString)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
 		})
@@ -65,7 +86,7 @@ func GetLobbyByDay(c *gin.Context) {
 		return
 	}
 
-	dayLobbbies, err := config.GetAllLobbyInADay(id, day.DayNumber)
+	dayLobbbies, err := config.GetAllLobbyInADay(id, dayNumber)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
@@ -78,8 +99,10 @@ func GetLobbyByDay(c *gin.Context) {
 
 func GetLobbyByID(c *gin.Context) {
 	id := c.Param("id")
-	var lobbyDetails model.LobbyDetails
-	if err := c.ShouldBindJSON(&lobbyDetails); err != nil {
+	dayNumberString := c.Param("day_number")
+	lobbyID := c.Param("lobby_id")
+	dayNumber, err := strconv.Atoi(dayNumberString)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
 		})
@@ -87,16 +110,7 @@ func GetLobbyByID(c *gin.Context) {
 		return
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(lobbyDetails); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"response": err.Error(),
-		})
-		c.Abort()
-		return
-	}
-
-	lobby, err := config.GetLobbyByID(id, lobbyDetails.LobbyID, lobbyDetails.DayNumber)
+	lobby, err := config.GetLobbyByID(id, lobbyID, dayNumber)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
@@ -111,8 +125,10 @@ func GetLobbyByID(c *gin.Context) {
 func GetPlayersInALobbby(c *gin.Context) {
 
 	id := c.Param("id")
-	var lobbyDetails model.LobbyDetails
-	if err := c.ShouldBindJSON(&lobbyDetails); err != nil {
+	dayNumberString := c.Param("day_number")
+	lobbyID := c.Param("lobby_id")
+	dayNumber, err := strconv.Atoi(dayNumberString)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
 		})
@@ -120,16 +136,7 @@ func GetPlayersInALobbby(c *gin.Context) {
 		return
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(lobbyDetails); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"response": err.Error(),
-		})
-		c.Abort()
-		return
-	}
-
-	players, err := config.GetPlayersInALobbby(id, lobbyDetails.LobbyID, lobbyDetails.DayNumber)
+	players, err := config.GetPlayersInALobbby(id, lobbyID, dayNumber)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
@@ -271,7 +278,7 @@ func AddPlayerKillsInALobby(c *gin.Context) {
 		return
 	}
 
-	allLobby, err := config.InsertPlayerKillInALobby(_id, playerCreation.LobbyID, playerCreation, playerCreation.DayNumber)
+	players, err := config.InsertPlayerKillInALobby(_id, playerCreation.LobbyID, playerCreation, playerCreation.DayNumber)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),
@@ -279,6 +286,6 @@ func AddPlayerKillsInALobby(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	c.JSON(http.StatusCreated, allLobby)
+	c.JSON(http.StatusCreated, players)
 
 }

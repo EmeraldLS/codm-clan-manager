@@ -10,6 +10,8 @@ type Attendance struct {
 	Day3           LobbiesData
 	Day4           LobbiesData
 	Day5           LobbiesData
+	Day6           LobbiesData
+	Day7           LobbiesData
 }
 
 type LobbiesData struct {
@@ -35,11 +37,6 @@ type Day struct {
 	DayNumber int `json:"day_number" validate:"required"`
 }
 
-type LobbyDetails struct {
-	DayNumber int    `json:"day_number"  validate:"required"`
-	LobbyID   string `json:"lobby_id"  validate:"required"`
-}
-
 type PlayerDetails struct {
 	DayNumber int    `json:"day_number"  validate:"required"`
 	LobbyID   string `json:"lobby_id"  validate:"required"`
@@ -55,9 +52,8 @@ type LobbyCreation struct {
 }
 
 type KillCount struct {
-	LobbyNumber int    `json:"lobby_number,omitempty" validate:"required"`
-	LobbyID     string `json:"lobby_id,omitempty" validate:"required"`
-	DayNumber   int    `json:"day_number,omitempty" bson:"day_number,omitempty" validate:"required"`
-	PLayerID    string `json:"player_id,omitempty" validate:"required"`
-	Kills       int    `json:"kills,omitempty" validate:"required"`
+	LobbyID   string `json:"lobby_id,omitempty" validate:"required"`
+	DayNumber int    `json:"day_number,omitempty" bson:"day_number,omitempty" validate:"required"`
+	PLayerID  string `json:"player_id,omitempty" validate:"required"`
+	Kills     int    `json:"kills,omitempty" validate:"required"`
 }

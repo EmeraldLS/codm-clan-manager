@@ -49,3 +49,30 @@ func RegisterPlayer(c *gin.Context) {
 	})
 
 }
+
+func GetAllUsers(c *gin.Context) {
+	users, err := config.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+
+}
+
+func GetSingleUser(c *gin.Context) {
+	playerId := c.Param("player_id")
+	user, err := config.GetSingleUser(playerId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}

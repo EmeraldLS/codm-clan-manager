@@ -37,6 +37,43 @@ func RegisterPlayer(player model.User) error {
 	return nil
 }
 
+func GetAllTournament() ([]model.Attendance, error) {
+	filter := bson.M{}
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+	cursor, err := AttendanceCollection.Find(ctx, filter)
+	if err != nil {
+		return []model.Attendance{}, err
+	}
+	var tournaments []model.Attendance
+	for cursor.Next(ctx) {
+		var tournament model.Attendance
+		cursor.Decode(&tournament)
+		tournaments = append(tournaments, tournament)
+	}
+
+	return tournaments, nil
+}
+
+func GetTournament(id string) (model.Attendance, error) {
+	_id, err := ConvertStringToOBjectID(id)
+	if err != nil {
+		return model.Attendance{}, err
+	}
+
+	filter := bson.M{"_id": _id}
+
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+	var tournament model.Attendance
+	err = AttendanceCollection.FindOne(ctx, filter).Decode(&tournament)
+	if err != nil {
+		return model.Attendance{}, err
+	}
+
+	return tournament, nil
+}
+
 func GetAllLobbyInADay(id string, day int) ([]model.Lobby, error) {
 	attedance, err := getAttedanceByID(id)
 	if err != nil {
@@ -56,6 +93,10 @@ func GetAllLobbyInADay(id string, day int) ([]model.Lobby, error) {
 		allLobby = attedance.Day4.Lobbies
 	case 5:
 		allLobby = attedance.Day5.Lobbies
+	case 6:
+		allLobby = attedance.Day6.Lobbies
+	case 7:
+		allLobby = attedance.Day7.Lobbies
 	default:
 		return []model.Lobby{}, errors.New("invalid day number")
 	}
@@ -174,15 +215,15 @@ func CreateLobby(id string, lobbyCreation model.LobbyCreation) ([]model.Lobby, e
 	return allLobby, nil
 }
 
-func InsertPlayerKillInALobby(id string, lobbyID string, playerCreation model.KillCount, day int) ([]model.Lobby, error) {
+func InsertPlayerKillInALobby(id string, lobbyID string, playerCreation model.KillCount, day int) ([]model.Player, error) {
 	allPlayers, err := GetPlayersInALobbby(id, lobbyID, day)
 	if err != nil {
-		return []model.Lobby{}, err
+		return []model.Player{}, err
 	}
 
 	user, err := GetUserByID(playerCreation.PLayerID)
 	if err != nil {
-		return []model.Lobby{}, err
+		return []model.Player{}, err
 	}
 
 	player := model.Player{
@@ -208,10 +249,14 @@ func InsertPlayerKillInALobby(id string, lobbyID string, playerCreation model.Ki
 		allLobby, lobbyErr = GetAllLobbyInADay(id, 4)
 	case 5:
 		allLobby, lobbyErr = GetAllLobbyInADay(id, 5)
+	case 6:
+		allLobby, lobbyErr = GetAllLobbyInADay(id, 6)
+	case 7:
+		allLobby, lobbyErr = GetAllLobbyInADay(id, 7)
 	}
 
 	if lobbyErr != nil {
-		return []model.Lobby{}, lobbyErr
+		return []model.Player{}, lobbyErr
 	}
 
 	var newLobbies = []model.Lobby{}
@@ -222,7 +267,7 @@ func InsertPlayerKillInALobby(id string, lobbyID string, playerCreation model.Ki
 			i.Players = allPlayers
 		}
 		if len(i.Players) > 4 {
-			return []model.Lobby{}, errors.New("lobby is filled up")
+			return []model.Player{}, errors.New("lobby is filled up")
 		}
 		newLobbies = append(newLobbies, i)
 	}
@@ -233,16 +278,19 @@ func InsertPlayerKillInALobby(id string, lobbyID string, playerCreation model.Ki
 	defer cancel()
 	_id, err := ConvertStringToOBjectID(id)
 	if err != nil {
-		return []model.Lobby{}, err
+		return []model.Player{}, err
 	}
 	filter := bson.M{"_id": _id}
-	result, err := AttendanceCollection.UpdateOne(ctx, filter, update)
+	_, err = AttendanceCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return []model.Lobby{}, err
+		return []model.Player{}, err
 	}
-	fmt.Printf("Modified Count: %v\n", result.ModifiedCount)
+	players, err := GetPlayersInALobbby(id, lobbyID, day)
+	if err != nil {
+		return []model.Player{}, err
+	}
 
-	return newLobbies, nil
+	return players, nil
 
 }
 

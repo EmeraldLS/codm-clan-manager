@@ -32,13 +32,16 @@ func createDay() model.LobbiesData {
 	}
 }
 
-func RepresentDBData() model.Attendance {
+func RepresentDBData(tournament_name string) model.Attendance {
 	attendance := model.Attendance{
-		Day1: createDay(),
-		Day2: createDay(),
-		Day3: createDay(),
-		Day4: createDay(),
-		Day5: createDay(),
+		TournamentName: tournament_name,
+		Day1:           createDay(),
+		Day2:           createDay(),
+		Day3:           createDay(),
+		Day4:           createDay(),
+		Day5:           createDay(),
+		Day6:           createDay(),
+		Day7:           createDay(),
 	}
 
 	return attendance
