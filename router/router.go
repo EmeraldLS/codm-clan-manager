@@ -11,17 +11,9 @@ import (
 func Run() {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowAllOrigins:        false,
-		AllowOrigins:           []string{"https://vought-esport.vercel.app", "http://localhost:3000"},
-		AllowMethods:           []string{"POST", "PUT", "GET", "DELETE"},
-		AllowHeaders:           []string{"Content-Type"},
-		AllowCredentials:       false,
-		ExposeHeaders:          []string{},
-		MaxAge:                 0,
-		AllowWildcard:          false,
-		AllowBrowserExtensions: false,
-		AllowWebSockets:        false,
-		AllowFiles:             false,
+		AllowOrigins: []string{"https://vought-esport.vercel.app", "http://localhost:3000"},
+		AllowMethods: []string{"POST", "PUT", "GET", "DELETE"},
+		AllowHeaders: []string{"Content-Type"},
 	}))
 	port := os.Getenv("API_PORT")
 	r.POST("/attendance", controller.InitializeDbContent)
