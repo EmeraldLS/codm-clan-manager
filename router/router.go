@@ -11,7 +11,7 @@ import (
 func Run() {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"https://vought-esport.vercel.app", "http://localhost:3000"},
+		AllowOrigins: []string{"https://vought-esport.vercel.app"},
 		AllowMethods: []string{"POST", "PUT", "GET", "DELETE"},
 		AllowHeaders: []string{"Content-Type"},
 	}))
