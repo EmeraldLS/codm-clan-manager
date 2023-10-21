@@ -43,11 +43,19 @@ func GetUserByID(playerID string) (model.User, error) {
 
 }
 
-func GetAllUsers() ([]model.User, error) {
+func GetAllUsers(page int64) ([]model.User, error) {
 	filter := bson.M{}
 	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
 	defer cancel()
-	findOptions := options.Find().SetSort(bson.M{"player_code": -1})
+	findOptions := options.Find()
+
+	findOptions.SetSort(bson.M{"player_code": -1})
+	if page != 0 {
+		var perpage int64 = 1000
+		findOptions.SetSkip((page - 1) * perpage)
+		findOptions.SetLimit(perpage)
+	}
+
 	cursor, err := PlayersCollection.Find(ctx, filter, findOptions)
 	if err != nil {
 		return []model.User{}, err

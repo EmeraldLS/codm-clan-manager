@@ -13,7 +13,6 @@ import (
 )
 
 func InitializeDbContent(c *gin.Context) {
-
 	var data struct {
 		TournamentName string `json:"tournament_name,omitempty" bson:"tournament_name,omitempty" validate:"required"`
 	}

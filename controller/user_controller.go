@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -51,7 +52,15 @@ func RegisterPlayer(c *gin.Context) {
 }
 
 func GetAllUsers(c *gin.Context) {
-	users, err := config.GetAllUsers()
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+	users, err := config.GetAllUsers(int64(page))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"response": err.Error(),

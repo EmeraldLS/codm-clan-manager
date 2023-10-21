@@ -41,6 +41,9 @@ func GetAllTournament() ([]model.Attendance, error) {
 	filter := bson.M{}
 	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
 	defer cancel()
+
+	// findOptions := options.Find()
+
 	cursor, err := AttendanceCollection.Find(ctx, filter)
 	if err != nil {
 		return []model.Attendance{}, err
