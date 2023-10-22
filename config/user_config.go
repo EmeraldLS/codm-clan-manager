@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/golang-module/carbon"
 	"github.com/vought-esport-attendance/db"
 	"github.com/vought-esport-attendance/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -79,4 +80,27 @@ func GetSingleUser(playerId string) (model.User, error) {
 		return model.User{}, err
 	}
 	return user, nil
+}
+
+func UpdateUserName(playerId, name string) (string, error) {
+	_, err := GetSingleUser(playerId)
+	if err != nil {
+		return "", err
+	}
+
+	filter := bson.M{"player_id": playerId}
+	var updateObj = bson.M{}
+	if name != "" {
+		updateObj["name"] = name
+	}
+	updateObj["updated_at"] = carbon.Now().ToDateTimeString()
+	update := bson.M{"$set": updateObj}
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+	_, err = PlayersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return "", err
+	}
+
+	return "Player Updated Successfully", nil
 }

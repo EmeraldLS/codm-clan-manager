@@ -85,3 +85,41 @@ func GetSingleUser(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, user)
 }
+
+func UpdateUserName(c *gin.Context) {
+	playerId := c.Param("player_id")
+	var User struct {
+		Name string `json:"name" validate:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&User); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(User); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	message, err := config.UpdateUserName(playerId, User.Name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": message,
+	})
+
+}

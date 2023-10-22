@@ -237,12 +237,6 @@ func CreateLobby(c *gin.Context) {
 	lobby.Date = carbon.Now().ToDateString()
 	lobby.LobbyID = uuid.NewString()
 
-	// lobby := model.Lobby{
-	// 	LobbyID:     uuid.NewString(),
-	// 	LobbyNumber: 1,
-	// 	Date:        carbon.Now().ToDateString(),
-	// 	Players:     []model.Player{},
-	// }
 	allLobby, err := config.CreateLobby(_id, lobby)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -287,4 +281,60 @@ func AddPlayerKillsInALobby(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, players)
 
+}
+
+func GetTotalPlayerKillsInADay(c *gin.Context) {
+	id := c.Param("id")
+	dayString := c.Param("day_number")
+	day, _ := strconv.Atoi(dayString)
+	playerId := c.Param("player_id")
+	totalKills, err := config.GetTotalPlayerKillsInADay(id, playerId, day)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	player, err := config.GetUserByID(playerId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"total_kills": totalKills,
+		"player name": player.Name,
+	})
+}
+
+func GetTotalPlayerKillsInWholeTournament(c *gin.Context) {
+	id := c.Param("id")
+	playerId := c.Param("player_id")
+	totalKills, err := config.GetTotalPlayerKillsInWholeTournament(id, playerId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	player, err := config.GetUserByID(playerId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"total_kills": totalKills,
+		"player_name": player.Name,
+	})
 }

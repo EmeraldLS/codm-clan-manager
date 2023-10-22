@@ -105,7 +105,37 @@ func GetAllLobbyInADay(id string, day int) ([]model.Lobby, error) {
 	}
 
 	return allLobby, nil
+}
 
+func GetTotalPlayerKillsInADay(id, playerID string, day int) (int, error) {
+	allLobby, err := GetAllLobbyInADay(id, day)
+	total := 0
+	if err != nil {
+		return total, err
+	}
+	for _, lobby := range allLobby {
+		for _, player := range lobby.Players {
+			if player.PlayerID == playerID {
+				total += player.Kills
+			}
+		}
+	}
+
+	return total, nil
+}
+
+func GetTotalPlayerKillsInWholeTournament(id, playerID string) (int, error) {
+	total := 0
+
+	for day := 1; day <= 7; day++ {
+		dayTotal, err := GetTotalPlayerKillsInADay(id, playerID, day)
+		if err != nil {
+			return total, err
+		}
+		fmt.Printf("Day %v, you've %v kills\n", day, dayTotal)
+		total += dayTotal
+	}
+	return total, nil
 }
 
 func getAttedanceByID(id string) (model.Attendance, error) {
@@ -197,7 +227,7 @@ func CreateLobby(id string, lobbyCreation model.LobbyCreation) ([]model.Lobby, e
 
 	allLobby = append(allLobby, lobby)
 	var updateObj = bson.M{}
-	if lobbyCreation.DayNumber > 5 || lobbyCreation.DayNumber < 1 {
+	if lobbyCreation.DayNumber > 7 || lobbyCreation.DayNumber < 1 {
 		return []model.Lobby{}, errors.New("invalid day number")
 	}
 	queryString := fmt.Sprintf("day%v.lobbies", lobbyCreation.DayNumber)
@@ -264,15 +294,22 @@ func InsertPlayerKillInALobby(id string, lobbyID string, playerCreation model.Ki
 
 	var newLobbies = []model.Lobby{}
 
-	for _, i := range allLobby {
-		if i.LobbyID == lobbyID {
+	for _, aLobby := range allLobby {
+		if aLobby.LobbyID == lobbyID {
+			for _, aPlayer := range aLobby.Players {
+				if aPlayer.PlayerID == player.PlayerID {
+					return []model.Player{}, errors.New("player already exist in this lobby")
+				}
+			}
 			allPlayers = append(allPlayers, player)
-			i.Players = allPlayers
+			aLobby.Players = allPlayers
+
 		}
-		if len(i.Players) > 4 {
+		if len(aLobby.Players) > 4 {
 			return []model.Player{}, errors.New("lobby is filled up")
 		}
-		newLobbies = append(newLobbies, i)
+
+		newLobbies = append(newLobbies, aLobby)
 	}
 
 	updateObj[queryString] = newLobbies

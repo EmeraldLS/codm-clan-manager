@@ -17,9 +17,11 @@ func Run() {
 	}))
 	port := os.Getenv("API_PORT")
 	r.POST("/attendance", controller.InitializeDbContent)
+	r.POST("/register", controller.RegisterPlayer)
+	r.POST("/lobby/:id", controller.CreateLobby)
+
 	r.GET("/tournaments", controller.GetAllTournament)
 	r.GET("/tournaments/:id", controller.GetTournament)
-	r.POST("/register", controller.RegisterPlayer)
 	r.GET("/lobbies/:id/:day_number", controller.GetLobbyByDay)
 	r.GET("/lobby/:id", controller.GetLobbyByID)
 	r.GET("/lobby_index/:id", controller.GetLobbyByIndex)
@@ -27,8 +29,12 @@ func Run() {
 	r.GET("/users", controller.GetAllUsers)
 	r.GET("/users/:player_id", controller.GetSingleUser)
 	r.GET("/player_from_lobby/:id", controller.GetPlayerDetailsFromALobby)
-	r.POST("/lobby/:id", controller.CreateLobby)
+
+	r.GET("/player_kills_total_day/:id/:day_number/:player_id", controller.GetTotalPlayerKillsInADay)
+	r.GET("/player_total_kills_tournament/:id/:player_id", controller.GetTotalPlayerKillsInWholeTournament)
+
 	r.PUT("/lobby/player/:id", controller.AddPlayerKillsInALobby)
+	r.PUT("/user/:player_id", controller.UpdateUserName)
 
 	r.Run("0.0.0.0:" + port)
 }
