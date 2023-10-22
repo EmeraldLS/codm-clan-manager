@@ -248,7 +248,7 @@ func CreateLobby(id string, lobbyCreation model.LobbyCreation) ([]model.Lobby, e
 	return allLobby, nil
 }
 
-func InsertPlayerKillInALobby(id string, lobbyID string, playerCreation model.KillCount, day int) ([]model.Player, error) {
+func InsertPlayerKillInALobby(id, lobbyID string, playerCreation model.KillCount, day int) ([]model.Player, error) {
 	allPlayers, err := GetPlayersInALobbby(id, lobbyID, day)
 	if err != nil {
 		return []model.Player{}, err
