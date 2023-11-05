@@ -11,7 +11,7 @@ import (
 func Run() {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://vought-esports.netlify.app", "http://localhost:3000"},
+		AllowOrigins: []string{"http://vought-esports.netlify.app"},
 		AllowMethods: []string{"POST", "PUT", "GET", "DELETE"},
 		AllowHeaders: []string{"Content-Type"},
 	}))
