@@ -10,7 +10,6 @@ import (
 	"github.com/vought-esport-attendance/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var AttendanceCollection = db.AttendanceCollection
@@ -191,6 +190,27 @@ func GetAPlayerFromALobby(id string, lobbyID string, playerID string, day int) (
 	return foundPlayer, nil
 }
 
+func GetAllPlayersInAday(id string, day int) ([]model.Player, error) {
+	//It returns all the players that participated in the particular day from 3 lobbies played
+	allLobby, err := GetAllLobbyInADay(id, day)
+	var players []model.Player
+	if err != nil {
+		return nil, err
+	}
+
+	var encountered = map[string]bool{}
+	for _, aLobby := range allLobby {
+		for _, aPlayer := range aLobby.Players {
+			if !encountered[aPlayer.PlayerID] {
+				encountered[aPlayer.PlayerID] = true
+				players = append(players, aPlayer)
+			}
+		}
+	}
+
+	return players, nil
+}
+
 func ConvertStringToOBjectID(id string) (primitive.ObjectID, error) {
 	_id, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -334,34 +354,34 @@ func InsertPlayerKillInALobby(id, lobbyID string, playerCreation model.KillCount
 
 }
 
-func GetLobbyByIndex(id string) error {
-	_id, err := ConvertStringToOBjectID(id)
-	if err != nil {
-		return err
-	}
-	filter := bson.M{"_id": _id}
-	projection := bson.M{"lobby": bson.M{
-		"$arrayElemAt": []interface{}{"$day1.lobbies", 1},
-	}}
+// func GetLobbyByIndex(id string) error {
+// 	_id, err := ConvertStringToOBjectID(id)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	filter := bson.M{"_id": _id}
+// 	projection := bson.M{"lobby": bson.M{
+// 		"$arrayElemAt": []interface{}{"$day1.lobbies", 1},
+// 	}}
 
-	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	cursor, err := AttendanceCollection.Aggregate(ctx, mongo.Pipeline{
-		{{"$match", filter}},
-		{{"$project", projection}},
-	})
-	if err != nil {
-		return err
-	}
+// 	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
+// 	cursor, err := AttendanceCollection.Aggregate(ctx, mongo.Pipeline{
+// 		{{"$match", filter}},
+// 		{{"$project", projection}},
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
 
-	for cursor.Next(ctx) {
-		var result = bson.M{}
-		cursor.Decode(&result)
-		key := result["_id"]
-		fmt.Println(key)
-	}
-	return nil
-}
+// 	for cursor.Next(ctx) {
+// 		var result = bson.M{}
+// 		cursor.Decode(&result)
+// 		key := result["_id"]
+// 		fmt.Println(key)
+// 	}
+// 	return nil
+// }
 
 /*
 

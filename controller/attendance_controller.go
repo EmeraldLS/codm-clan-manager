@@ -24,6 +24,7 @@ func InitializeDbContent(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
 	var validate = validator.New()
 	if err := validate.Struct(data); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -148,6 +149,30 @@ func GetPlayersInALobbby(c *gin.Context) {
 
 }
 
+func GetAllPlayersInAday(c *gin.Context) {
+	id := c.Param("id")
+	dayNumberString := c.Param("day_number")
+	dayNumber, err := strconv.Atoi(dayNumberString)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	players, err := config.GetAllPlayersInAday(id, dayNumber)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, players)
+}
+
 func GetPlayerDetailsFromALobby(c *gin.Context) {
 
 	id := c.Param("id")
@@ -181,20 +206,20 @@ func GetPlayerDetailsFromALobby(c *gin.Context) {
 	c.JSON(http.StatusOK, player)
 }
 
-func GetLobbyByIndex(c *gin.Context) {
-	id := c.Param("id")
-	if err := config.GetLobbyByIndex(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"response": err.Error(),
-		})
-		c.Abort()
-		return
-	}
+// func GetLobbyByIndex(c *gin.Context) {
+// 	id := c.Param("id")
+// 	if err := config.GetLobbyByIndex(id); err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{
+// 			"response": err.Error(),
+// 		})
+// 		c.Abort()
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"response": "success",
-	})
-}
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"response": "success",
+// 	})
+// }
 
 // func InsertPlayerKills(c *gin.Context) {
 // 	playerID := c.Param("player_id")
@@ -308,7 +333,7 @@ func GetTotalPlayerKillsInADay(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"total_kills": totalKills,
-		"player name": player.Name,
+		"player_name": player.Name,
 	})
 }
 

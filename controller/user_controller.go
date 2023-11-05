@@ -89,7 +89,7 @@ func GetSingleUser(c *gin.Context) {
 func UpdateUserName(c *gin.Context) {
 	playerId := c.Param("player_id")
 	var User struct {
-		Name string `json:"name" validate:"required"`
+		Name string `json:"name"`
 	}
 
 	if err := c.ShouldBindJSON(&User); err != nil {
