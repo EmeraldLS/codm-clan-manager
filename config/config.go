@@ -10,6 +10,7 @@ import (
 	"github.com/vought-esport-attendance/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var AttendanceCollection = db.AttendanceCollection
@@ -41,9 +42,9 @@ func GetAllTournament() ([]model.Attendance, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
 	defer cancel()
 
-	// findOptions := options.Find()
+	findOptions := options.Find().SetSort(bson.M{"tournament_code": -1})
 
-	cursor, err := AttendanceCollection.Find(ctx, filter)
+	cursor, err := AttendanceCollection.Find(ctx, filter, findOptions)
 	if err != nil {
 		return []model.Attendance{}, err
 	}

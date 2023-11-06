@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/golang-module/carbon"
 	"github.com/google/uuid"
+	"github.com/vought-esport-attendance/code"
 	"github.com/vought-esport-attendance/model"
 )
 
@@ -44,5 +45,9 @@ func RepresentDBData(tournament_name string) model.Attendance {
 		Day7:           createDay(),
 	}
 
+	maxCode := code.GetMaxTournamentCode()
+
+	attendance.TournamentCode = maxCode + 1
+	attendance.TournamentID = code.GenTournamentID(attendance.TournamentCode)
 	return attendance
 }

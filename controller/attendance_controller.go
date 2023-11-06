@@ -33,6 +33,7 @@ func InitializeDbContent(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
 	attendance := RepresentDBData(data.TournamentName)
 	if err := config.InitializeDbContent(attendance); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

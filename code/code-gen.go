@@ -31,8 +31,34 @@ func GetMaxPlayerCode() int {
 	return maxCode
 }
 
+func GetMaxTournamentCode() int {
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+	filter := bson.M{}
+	findOptions := options.Find().SetSort(bson.M{"tournament_code": -1}).SetLimit(1)
+	cursor, _ := db.AttendanceCollection.Find(ctx, filter, findOptions)
+	defer cursor.Close(ctx)
+	var tournaments []model.Attendance
+	for cursor.Next(ctx) {
+		var tournament model.Attendance
+		cursor.Decode(&tournament)
+		tournaments = append(tournaments, tournament)
+	}
+	var maxCode int
+	for _, tournament := range tournaments {
+		maxCode = tournament.TournamentCode
+	}
+	return maxCode
+}
+
 func GenPlayerID(player_code int) string {
 	prefix := "VOUGHT_PLAYER_"
 	userID := fmt.Sprintf("%v%d", prefix, player_code)
 	return userID
+}
+
+func GenTournamentID(tournament_code int) string {
+	prefix := "TOURNAMENT_"
+	tournamentID := fmt.Sprintf("%v%d", prefix, tournament_code)
+	return tournamentID
 }
