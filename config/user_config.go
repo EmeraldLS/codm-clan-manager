@@ -52,7 +52,7 @@ func GetAllUsers(page int64) ([]model.User, error) {
 
 	findOptions.SetSort(bson.M{"player_code": -1})
 	if page != 0 {
-		var perpage int64 = 1000
+		var perpage int64 = 10
 		findOptions.SetSkip((page - 1) * perpage)
 		findOptions.SetLimit(perpage)
 	}
