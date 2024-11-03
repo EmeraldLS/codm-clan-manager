@@ -14,22 +14,18 @@ import (
 
 func RegisterPlayer(c *gin.Context) {
 	var playerDetails model.User
+
 	if err := c.ShouldBindJSON(&playerDetails); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"response": err.Error(),
-		})
-		c.Abort()
+		c.JSON(http.StatusBadRequest, gin.H{"response": "Invalid request data"})
 		return
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(&playerDetails); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"response": err.Error(),
-		})
-		c.Abort()
+		c.JSON(http.StatusBadRequest, gin.H{"response": "Validation failed"})
 		return
 	}
+
 	maxCode := code.GetMaxPlayerCode()
 	playerDetails.PlayerCode = maxCode + 1
 	playerDetails.PlayerID = code.GenPlayerID(playerDetails.PlayerCode)
@@ -37,18 +33,14 @@ func RegisterPlayer(c *gin.Context) {
 	playerDetails.UpdatedAt = carbon.Now().ToDateTimeString()
 
 	if err := config.RegisterPlayer(playerDetails); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"response": err.Error(),
-		})
-		c.Abort()
+		c.JSON(http.StatusInternalServerError, gin.H{"response": "Failed to register player"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
 		"response": "success",
-		"User":     playerDetails,
+		"user":     playerDetails,
 	})
-
 }
 
 func GetAllUsers(c *gin.Context) {

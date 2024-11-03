@@ -1,8 +1,6 @@
 package router
 
 import (
-	"net/http"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/vought-esport-attendance/controller"
@@ -24,13 +22,7 @@ func Run() {
 	audience := helpers.SafeGetEnv("AUTH0_AUDIENCE")
 	domain := helpers.SafeGetEnv("AUTH0_DOMAIN")
 
-	securedMiddleware := func() gin.HandlerFunc {
-		return func(c *gin.Context) {
-			middleware.ValidateJWT(audience, domain, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				c.Next()
-			})).ServeHTTP(c.Writer, c.Request)
-		}
-	}()
+	securedMiddleware := middleware.ValidateJWT(audience, domain)
 
 	secure := r.Group("/")
 	secure.Use(securedMiddleware)

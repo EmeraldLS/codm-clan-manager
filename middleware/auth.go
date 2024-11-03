@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -11,8 +10,8 @@ import (
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"github.com/vought-esport-attendance/helpers"
 )
 
 // CustomClaims defines additional JWT claims if needed
@@ -29,19 +28,20 @@ type ErrorMessage struct {
 	Message string `json:"message"`
 }
 
-// ValidateJWT sets up the JWT middleware with custom error handling and claims validation
-func ValidateJWT(audience, domain string, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Parse the issuer URL from the domain
+const missingJWTErrorMessage = "Missing JWT token"
+const invalidJWTErrorMessage = "Invalid JWT token"
+
+func ValidateJWT(audience, domain string) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		issuerURL, err := url.Parse("https://" + domain + "/")
 		if err != nil {
-			log.Fatalf("Failed to parse the issuer URL: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Invalid issuer URL"})
+			c.Abort()
+			return
 		}
 
-		// Set up the JWT provider with caching
 		provider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
 
-		// Initialize the JWT validator
 		jwtValidator, err := validator.New(
 			provider.KeyFunc,
 			validator.RS256,
@@ -52,42 +52,32 @@ func ValidateJWT(audience, domain string, next http.Handler) http.Handler {
 			}),
 		)
 		if err != nil {
-			log.Fatalf("Failed to set up the JWT validator: %v", err)
-		}
-
-		// Check that the Authorization header is a Bearer token
-		if authHeaderParts := strings.Fields(r.Header.Get("Authorization")); len(authHeaderParts) > 0 && strings.ToLower(authHeaderParts[0]) != "bearer" {
-			helpers.WriteJSON(w, http.StatusUnauthorized, ErrorMessage{Message: "Bad credentials"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to set up JWT validator"})
+			c.Abort()
 			return
 		}
 
-		// Error handling for JWT validation
-		errorHandler := func(w http.ResponseWriter, r *http.Request, err error) {
-			log.Printf("Error validating JWT: %v", err)
-			var status int
-			var message string
-
-			if errors.Is(err, jwtmiddleware.ErrJWTMissing) {
-				status = http.StatusUnauthorized
-				message = "Requires authentication"
-			} else if errors.Is(err, jwtmiddleware.ErrJWTInvalid) {
-				status = http.StatusUnauthorized
-				message = "Bad credentials"
-			} else {
-				status = http.StatusInternalServerError
-				message = "Internal Server Error"
-			}
-
-			helpers.WriteJSON(w, status, ErrorMessage{Message: message})
+		// Check for Bearer token
+		authHeader := c.GetHeader("Authorization")
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": missingJWTErrorMessage})
+			c.Abort()
+			return
 		}
 
-		// Set up the JWT middleware
-		middleware := jwtmiddleware.New(
-			jwtValidator.ValidateToken,
-			jwtmiddleware.WithErrorHandler(errorHandler),
-		)
+		// Validate JWT
+		_, err = jwtValidator.ValidateToken(c.Request.Context(), strings.TrimPrefix(authHeader, "Bearer "))
+		if err != nil {
+			if errors.Is(err, jwtmiddleware.ErrJWTMissing) {
+				c.JSON(http.StatusUnauthorized, gin.H{"message": missingJWTErrorMessage})
+			} else {
+				c.JSON(http.StatusUnauthorized, gin.H{"message": invalidJWTErrorMessage})
+			}
+			c.Abort()
+			return
+		}
 
-		// Apply the middleware to the next handler
-		middleware.CheckJWT(next).ServeHTTP(w, r)
-	})
+		// If everything is okay, proceed to the next handler
+		c.Next()
+	}
 }
