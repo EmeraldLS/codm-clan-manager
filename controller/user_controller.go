@@ -62,7 +62,20 @@ func GetAllUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, users)
+}
 
+func GetAllUsersWithoutPagination(c *gin.Context) {
+
+	users, err := config.GetAllUsersNoPagination()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"response": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }
 
 func GetSingleUser(c *gin.Context) {

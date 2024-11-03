@@ -38,6 +38,8 @@ func Run() {
 	// r.GET("/lobby_index/:id", controller.GetLobbyByIndex)
 	r.GET("/lobby_players/:id/:day_number/:lobby_id", controller.GetPlayersInALobbby)
 	r.GET("/users", controller.GetAllUsers)
+	r.GET("/users/all", controller.GetAllUsersWithoutPagination)
+
 	r.GET("/users/:player_id", controller.GetSingleUser)
 	r.GET("/player_from_lobby/:id", controller.GetPlayerDetailsFromALobby)
 	r.GET("/players/:id/:day_number", controller.GetAllPlayersInAday)
