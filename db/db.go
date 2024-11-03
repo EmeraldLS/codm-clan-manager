@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -41,7 +42,7 @@ func openCollection() error {
 
 func init() {
 	if err := godotenv.Load(".env"); err != nil {
-		panic(err)
+		fmt.Println("ignoring .env file not found")
 	}
 	if err := openCollection(); err != nil {
 		log.Fatalf("An Error Occured. %v\n", err)
